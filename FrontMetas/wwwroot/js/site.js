@@ -1,44 +1,42 @@
 ﻿$(document).ready(function () {
     // Inicializa el DataTable para tasksTable
-    $('#tasksTable').DataTable({
+    $('#tblTareas').DataTable({
         "paging": true,
         "searching": true,
         "info": true,
         "autoWidth": false
     });
 
-    // Maneja el clic en el botón "Nueva Meta"
-    $('#newMetaBtn').on('click', function () {
-        $('#metaModal').modal('show');
+    // Muestra el modal de metas
+    $('#btnNvaMeta').on('click', function () {
+        $('#mdlMeta').modal('show');
     });
 
     // Maneja el clic en el botón "Guardar Meta"
-    $('#saveMetaBtn').on('click', function () {
-        var metaName = $('#metaName').val();
-        if (metaName) {
+    $('#btnRegistraMeta').on('click', function () {
+        var metaNombre = $('#txtMetaNombre').val();
+        if (metaNombre) {
             // Aquí puedes manejar la lógica para guardar la nueva meta
-            console.log('Nueva meta guardada:', metaName);
-            $('#metaModal').modal('hide');
+            console.log('Nueva meta guardada:', metaNombre);
+            $('#mdlMeta').modal('hide');
         } else {
             alert('Por favor, ingrese el nombre de la meta.');
         }
     });
 
-    // Maneja el clic en el botón "Nueva Tarea"
-    $('#newTaskBtn').on('click', function () {
-        $('#taskModal').modal('show');
+    // Muestra el modal de tareas
+    $('#btnNvaTarea').on('click', function () {
+        $('#mdlTarea').modal('show');
     });
 
     // Maneja el clic en el botón "Guardar Tarea"
-    $('#saveTaskBtn').on('click', function () {
-        var taskName = $('#taskName').val();
-        var taskDate = $('#taskDate').val();
-        var taskStatus = $('#taskStatus').val();
+    $('#btnRegistraTarea').on('click', function () {
+        var tareaNombre = $('#txtTareaNombre').val();
 
-        if (taskName && taskDate && taskStatus) {
+        if (tareaNombre) {
             // Aquí puedes manejar la lógica para guardar la nueva tarea
-            console.log('Nueva tarea guardada:', taskName, taskDate, taskStatus);
-            $('#taskModal').modal('hide');
+            console.log('Nueva tarea guardada:', tareaNombre);
+            $('#mdlTarea').modal('hide');
         } else {
             alert('Por favor, complete todos los campos de la tarea.');
         }

@@ -8,10 +8,11 @@
     <div class="container mt-4">
         <h1 class="text-center mb-4">Metas</h1>
         <div class="row">
-            <!-- Div de izquierda con col-4 -->
-            <div class="col-4 border p-3 rounded">
-                <button class="btn btn-primary mb-3" id="newMetaBtn">Nueva Meta</button>
-
+            <!-- Div de izquierda metas -->
+            <div class="col-4 custom-card">
+                <button class="btn btn-primary mb-3" id="btnNvaMeta">
+                    <i class="bi bi-plus"></i> Nueva Meta
+                </button>
                 <table id="metasTable" class="table table-striped">
                     <thead>
                         <tr>
@@ -56,20 +57,19 @@
                                 </div>
                             </td>
                         </tr>
-                        <!-- Más filas según sea necesario -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- Div de derecha con col-8 -->
-            <div class="col-8 border p-3 rounded">
-                <div class="d-flex justify-content-between align-items-center">
+            <!-- Div de izquierda tareas -->
+            <div class="col-8 custom-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3>Tareas</h3>
-                    <!-- Botón para abrir el modal de nueva tarea -->
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taskModal">Nueva Tarea</button>
-
+                    <button class="btn btn-primary mb-3" id="btnNvaTarea">
+                        <i class="bi bi-plus"></i> Nueva Tarea
+                    </button>
                 </div>
-                <table id="tasksTable" class="table table-striped mt-3">
+                <table id="tblTareas" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Nombre de la Tarea</th>
@@ -105,7 +105,6 @@
                                 </button>
                             </td>
                         </tr>
-                        <!-- Más filas según sea necesario -->
                     </tbody>
                 </table>
             </div>
@@ -113,36 +112,32 @@
     </div>
 </div>
 
-
-<!-- Modal HTML -->
-<div id="metaModal" class="modal fade" tabindex="-1" role="dialog">
+<!-- Modal Nueva Meta -->
+<div id="mdlMeta" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Nueva Meta</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="metaForm">
                     <div class="form-group">
-                        <label for="metaName">Nombre de la Meta</label>
-                        <input type="text" class="form-control" id="metaName" placeholder="Ingrese el nombre de la meta">
+                        <label for="txtMetaNombre">Nombre de la Meta</label>
+                        <input type="text" class="form-control" id="txtMetaNombre" placeholder="Ingrese el nombre de la meta">
                     </div>
-                    <!-- Agrega más campos si es necesario -->
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="saveMetaBtn">Guardar Meta</button>
+                <button type="button" class="btn btn-primary" id="btnRegistraMeta">Registrar Meta</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal HTML para Nueva Tarea -->
-<div id="taskModal" class="modal fade" tabindex="-1" role="dialog">
+<!-- Modal Nueva Tarea -->
+<div id="mdlTarea" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -152,28 +147,15 @@
             <div class="modal-body">
                 <form id="taskForm">
                     <div class="form-group">
-                        <label for="taskName">Nombre de la Tarea</label>
-                        <input type="text" class="form-control" id="taskName" placeholder="Ingrese el nombre de la tarea">
-                    </div>
-                    <div class="form-group mt-3">
-                        <label for="taskDate">Fecha Creada</label>
-                        <input type="date" class="form-control" id="taskDate">
-                    </div>
-                    <div class="form-group mt-3">
-                        <label for="taskStatus">Estatus</label>
-                        <select class="form-control" id="taskStatus">
-                            <option value="En Progreso">En Progreso</option>
-                            <option value="Completada">Completada</option>
-                            <option value="Pendiente">Pendiente</option>
-                        </select>
+                        <label for="txtTareaNombre">Nombre de la Tarea</label>
+                        <input type="text" class="form-control" id="txtTareaNombre" placeholder="Ingrese el nombre de la tarea">
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="saveTaskBtn">Guardar Tarea</button>
+                <button type="button" class="btn btn-primary" id="btnRegistraTarea">Registra Tarea</button>
             </div>
         </div>
     </div>
 </div>
-
