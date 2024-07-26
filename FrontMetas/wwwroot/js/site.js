@@ -255,22 +255,47 @@ function obtenerTareas(metaId) {
                 // Iterar sobre las tareas y agregarlas a la tabla
                 response.forEach(function (tarea) {
                     console.log(tarea);
+
+                    // Verificar el estatus para desactivar botones si es igual a 2
+                    var botonesDesactivados = tarea.estatusId === 2;
+
                     var nuevaFila = `
                         <tr>
                             <td>${tarea.nombreTarea}</td>
                             <td>${new Date(tarea.fechaRegistro).toLocaleDateString()}</td>
                             <td>${tarea.estatusNombre}</td>
                             <td>
-                                <button class="btn btn-sm btn-info me-2">
+                                <button class="btn btn-sm btn-info me-2" 
+                                        ${botonesDesactivados ? 'disabled' : ''} 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger">
+                                <button class="btn btn-sm btn-danger me-2" 
+                                        ${botonesDesactivados ? 'disabled' : ''} 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Eliminar">
                                     <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-sm btn-success" 
+                                        ${botonesDesactivados ? 'disabled' : ''} 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="top" 
+                                        title="Finalizar">
+                                    <i class="bi bi-check-circle"></i>
                                 </button>
                             </td>
                         </tr>
                     `;
                     $('#tblTareas tbody').append(nuevaFila);
+                });
+
+                // Inicializar tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
                 });
             } else {
                 // Mostrar un mensaje en caso de que no haya tareas
@@ -292,6 +317,8 @@ function obtenerTareas(metaId) {
         }
     });
 }
+
+
 
 
 function cargarMetasEnDropdown() {
