@@ -62,7 +62,7 @@
                 <form id="metaForm">
                     <div class="form-group">
                         <label for="txtMetaNombre">Nombre de la Meta</label>
-                        <input type="text" class="form-control" id="txtMetaNombre" placeholder="Ingrese el nombre de la meta">
+                        <input type="text" class="form-control" id="txtMetaNombre" placeholder="Ingrese el nombre de la meta" required>
                     </div>
                 </form>
             </div>
@@ -76,6 +76,7 @@
     </div>
 </div>
 
+
 <!-- Modal Nueva Tarea -->
 <div id="mdlTarea" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -88,12 +89,12 @@
                 <form id="taskForm">
                     <div class="form-group">
                         <label for="txtTareaNombre">Nombre de la Tarea</label>
-                        <input type="text" class="form-control" id="txtTareaNombre" placeholder="Ingrese el nombre de la tarea">
+                        <input type="text" class="form-control" id="txtTareaNombre" placeholder="Ingrese el nombre de la tarea" required>
                     </div>
                     <div class="form-group mt-3">
                         <label for="selectMeta">Seleccionar Meta</label>
-                        <select class="form-control" id="selectMeta">
-                            <option value="0">Seleccione una meta</option>                            
+                        <select class="form-control" id="selectMeta" required>
+                            <option value="0">Seleccione una meta</option>
                         </select>
                     </div>
                 </form>
@@ -107,4 +108,5 @@
         </div>
     </div>
 </div>
+
 
