@@ -20,8 +20,10 @@ $(document).ready(function () {
 
     // Maneja el clic en el botón "Guardar Meta"
     $('#btnRegistraMeta').on('click', function () {
-        var metaNombre = $('#txtMetaNombre').val();
+        var metaNombre = $('#txtMetaNombre').val().trim();
         $('#txtMetaNombre').prop('disabled', false);
+
+        // Validar si el campo no está vacío
         if (metaNombre) {
             var metaData = {
                 NombreMeta: metaNombre,
@@ -50,18 +52,40 @@ $(document).ready(function () {
         }
     });
 
+
+    // Función para actualizar la meta
     $('#btnEditaMeta').on('click', function () {
-        var idMeta = $(this).data('id'); 
-        var nuevoNombre = $('#txtMetaNombre').val();       
+        var idMeta = $(this).data('id');
+        var nuevoNombre = $('#txtMetaNombre').val().trim();
+
+        // Validar que el campo no esté vacío
+        if (nuevoNombre === '') {
+            alert('El nombre de la meta no puede estar vacío.');
+            return;
+        }
+
+        // Llamar a la función para actualizar la meta
         actualizarMeta(idMeta, nuevoNombre);
     });
 
+    // Función para eliminar la meta
     $('#btnEliminaMeta').on('click', function () {
         var idMeta = $(this).data('id');
-        var nuevoNombre = $('#txtMetaNombre').val();
+        var nuevoNombre = $('#txtMetaNombre').val().trim();
+
+        // Validar que el campo no esté vacío
+        if (nuevoNombre === '') {
+            alert('El nombre de la meta no puede estar vacío.');
+            return;
+        }
+
+        // Deshabilitar el campo de texto
         $('#txtMetaNombre').prop('disabled', true);
-        eliminarMeta(idMeta);        
+
+        // Llamar a la función para eliminar la meta
+        eliminarMeta(idMeta);
     });
+
 
     // Muestra el modal de tareas
     $('#btnNvaTarea').on('click', function () {
@@ -75,14 +99,12 @@ $(document).ready(function () {
 
     // Maneja el clic en el botón "Guardar Tarea"
     $('#btnRegistraTarea').on('click', function () {
-        var TareaNombre = $('#txtTareaNombre').val();
+        var tareaNombre = $('#txtTareaNombre').val().trim();
         var idMeta = $('#selectMeta').val();
-        $('#mdlMeta .modal-title').text('Registrar Meta');
-        
 
-        if (TareaNombre) {
+        if (tareaNombre && idMeta !== '0') {
             var tareaData = {
-                NombreTarea: TareaNombre,
+                NombreTarea: tareaNombre,
                 IdEstatus: 1,
                 Activo: true,
                 FechaRegistro: new Date().toISOString(),
@@ -108,19 +130,46 @@ $(document).ready(function () {
         }
     });
 
+
+    // Función para actualizar la tarea
     $('#btnEditaTarea').on('click', function () {
         var idTarea = $(this).data('id');
-        var nuevoNombre = $('#txtTareaNombre').val();
+        var nuevoNombre = $('#txtTareaNombre').val().trim();
         var idMeta = $('#selectMeta').val();
+
+        if (nuevoNombre === '') {
+            alert('El nombre de la tarea no puede estar vacío.');
+            return;
+        }
+        if (idMeta === '0') {
+            alert('Debe seleccionar una meta.');
+            return;
+        }
+
+        // Llamar a la función para actualizar la tarea
         actualizarTarea(idTarea, nuevoNombre, idMeta);
     });
 
+    // Función para eliminar la tarea
     $('#btnEliminaTarea').on('click', function () {
         var idTarea = $(this).data('id');
-        var nuevoNombre = $('#txtTareaNombre').val();
+        var nuevoNombre = $('#txtTareaNombre').val().trim();
         var idMeta = $('#selectMeta').val();
+
+        if (nuevoNombre === '') {
+            alert('El nombre de la tarea no puede estar vacío.');
+            return;
+        }
+        if (idMeta === '0') {
+            alert('Debe seleccionar una meta.');
+            return;
+        }
+
+        // Deshabilitar los campos de texto y selección
         $('#txtTareaNombre').prop('disabled', true);
         $('#selectMeta').prop('disabled', true);
+
+        // Llamar a la función para eliminar la tarea
         eliminarTarea(idTarea, idMeta);
     });
 
@@ -133,12 +182,11 @@ function obtenerMetas() {
         url: urlAPI + 'Metas',
         type: 'GET',
         success: function (response) {
-            // Limpiar la tabla antes de agregar las nuevas filas
             $('#metasTable tbody').empty();
 
             // Iterar sobre las metas y agregarlas a la tabla
             response.forEach(function (meta) {
-                var progressValue = calcularProgreso(meta); // Asumiendo que tienes una función para calcular el progreso
+                var progressValue = calcularProgreso(meta);
                 var nuevaFila = `
                     <tr>
                         <td>${meta.nombreMeta}</td>
@@ -165,10 +213,7 @@ function obtenerMetas() {
                 $('#metasTable tbody').append(nuevaFila);
             });
 
-            // Destruir los tooltips existentes
             $('[data-bs-toggle="tooltip"]').tooltip('dispose');
-
-            // Inicializar los nuevos tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
         },
         error: function (xhr, status, error) {
@@ -182,13 +227,10 @@ function obtenerMetas() {
 // Función para obtener una meta por ID y mostrar los datos en el modal
 function obtenerMetaDetalle(idMeta,tipo) {
     $.ajax({
-        url: urlAPI + 'Metas/' + idMeta, // URL correcta para el endpoint
+        url: urlAPI + 'Metas/' + idMeta,
         type: 'GET',
         success: function (response) {
-            // Asumiendo que la respuesta es un array con un solo objeto
             var meta = response[0];
-
-            // Rellenar el campo de texto con el nombre de la meta
             $('#txtMetaNombre').val(meta.nombreMeta);            
 
             if (tipo == 1) {
@@ -205,8 +247,6 @@ function obtenerMetaDetalle(idMeta,tipo) {
                 $('#btnEditaMeta').hide();
                 $('#btnEliminaMeta').show().attr('data-id', idMeta);
             }
-
-            // Mostrar el modal
             $('#mdlMeta').modal('show');
         },
         error: function (xhr, status, error) {
@@ -217,9 +257,9 @@ function obtenerMetaDetalle(idMeta,tipo) {
 
 function actualizarMeta(idMeta, nuevoNombre) {
     $.ajax({
-        url: urlAPI + 'Metas/' + idMeta, // URL del endpoint para actualizar la meta
+        url: urlAPI + 'Metas/' + idMeta,
         type: 'PUT',
-        contentType: 'application/json', // Asegúrate de enviar el contenido como JSON
+        contentType: 'application/json',
         data: JSON.stringify({
             IdMeta: idMeta,
             NombreMeta: nuevoNombre,
@@ -241,10 +281,9 @@ function actualizarMeta(idMeta, nuevoNombre) {
 function eliminarMeta(idMeta) {
     
     $.ajax({
-        url: urlAPI + 'Metas/' + idMeta, // URL correcta para el endpoint DELETE
+        url: urlAPI + 'Metas/' + idMeta,
         type: 'DELETE',
         success: function (response) {
-            console.log(response.messaje); // Mensaje de éxito
             // Actualiza la tabla de metas después de eliminar la meta
             $('#mdlMeta').modal('hide');
             obtenerMetas();
@@ -258,9 +297,24 @@ function eliminarMeta(idMeta) {
 
 
 function calcularProgreso(meta) {
-    // Implementa la lógica para calcular el progreso de la meta
-    // Por ejemplo, si tienes un campo para el progreso en la meta, puedes usarlo aquí
-    return meta.progress || 0; // Retorna 0 si no hay campo de progreso
+    try {
+        // Obtener las tareas asociadas a la meta
+        var tareas = await obtenerTareas(metaId);
+
+        if (tareas.length === 0) {
+            return 0; // No hay tareas, progreso es 0%
+        }
+
+        var totalTareas = tareas.length;
+        var tareasCompletadas = tareas.filter(t => t.estatusId === 2).length; // Tareas con estatus 2 (completadas)
+
+        var progreso = (tareasCompletadas / totalTareas) * 100;
+
+        return Math.round(progreso); // Retornar el progreso redondeado
+    } catch (error) {
+        console.error('Error al calcular el progreso:', error);
+        return 0; // En caso de error, retornar 0%
+    }
 }
 
 function obtenerTareas(metaId) {
@@ -373,9 +427,7 @@ function obtenerTareaDetalle(idTarea, tipo) {
             console.log(tarea.idMeta);
 
             $('#txtTareaNombre').val(tarea.nombreTarea);
-            $('#selectMeta').val(tarea.idMeta);
-            // Seleccionar el valor correcto en el select después de cargar las opciones
-            
+            $('#selectMeta').val(tarea.idMeta);            
 
             if (tipo == 1) { // Editar
                 $('#txtTareaNombre').prop('disabled', false);
@@ -393,8 +445,6 @@ function obtenerTareaDetalle(idTarea, tipo) {
                 $('#btnEliminaTarea').show().attr('data-id', idTarea);
             }
 
-            
-
             // Mostrar el modal
             $('#mdlTarea').modal('show');
         },
@@ -403,7 +453,6 @@ function obtenerTareaDetalle(idTarea, tipo) {
         }
     });
 }
-
 
 function actualizarTarea(idTarea, nuevoNombre,idMeta) {
     $.ajax({
@@ -416,9 +465,7 @@ function actualizarTarea(idTarea, nuevoNombre,idMeta) {
             idMeta: idMeta,
             FechaActualizacion: new Date().toISOString()
         }),
-        success: function (response) {
-            console.log(response.message); // Mensaje de éxito
-            // Cierra el modal
+        success: function (response) {            
             $('#mdlTarea').modal('hide');
             obtenerTareas(idMeta);
         },
