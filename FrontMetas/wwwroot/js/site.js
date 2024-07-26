@@ -186,9 +186,7 @@ function obtenerMetas() {
 
             response.forEach(function (meta) {
                 calcularProgreso(meta.idMeta).then(function (progreso) {
-                    progreso = typeof progreso === 'number' ? progreso : 0; // Verificar que progreso sea un número
-                    console.log('Progreso de meta ' + meta.idMeta + ': ' + progreso); // Log del progreso
-
+                    progreso = typeof progreso === 'number' ? progreso : 0;
                     var color;
                     if (progreso < 40) {
                         color = 'orange';
@@ -240,8 +238,6 @@ function calcularProgreso(metaId) {
             url: urlAPI + 'Metas/Tareas/' + metaId,
             type: 'GET',
             success: function (response) {
-                console.log('Tareas para meta ' + metaId + ':', response); // Log para ver las tareas recuperadas
-
                 if (response.length === 0) {
                     resolve(0);
                 } else {
@@ -249,8 +245,6 @@ function calcularProgreso(metaId) {
                     var tareasCompletadas = response.filter(function (tarea) {
                         return tarea.idEstatus === 2;
                     }).length;
-
-                    console.log('Total tareas:', totalTareas, 'Tareas completadas:', tareasCompletadas); // Log para ver conteo de tareas
 
                     var progreso = (tareasCompletadas / totalTareas) * 100;
                     resolve(progreso);
@@ -263,12 +257,6 @@ function calcularProgreso(metaId) {
         });
     });
 }
-
-
-
-
-
-
 
 // Función para obtener una meta por ID y mostrar los datos en el modal
 function obtenerMetaDetalle(idMeta,tipo) {
@@ -312,7 +300,7 @@ function actualizarMeta(idMeta, nuevoNombre) {
             FechaActualizacion: new Date().toISOString()
         }),
         success: function (response) {
-            console.log(response.message); // Mensaje de éxito
+            console.log(response.message);
             // Cierra el modal
             $('#mdlMeta').modal('hide');
             obtenerMetas();
@@ -484,9 +472,9 @@ function actualizarTarea(idTareas, nuevoNombre, idMeta) {
         type: 'PUT',
         contentType: 'application/json',
         data: JSON.stringify({
-            NombreTarea: nuevoNombre, // Cambiar a NombreTarea
-            IdMeta: idMeta, // Asegúrate de que este campo sea correcto
-            FechaActualizacion: new Date().toISOString() // FechaActualizacion se puede mantener
+            NombreTarea: nuevoNombre,
+            IdMeta: idMeta, 
+            FechaActualizacion: new Date().toISOString()
         }),
         success: function (response) {
             $('#mdlTarea').modal('hide');
@@ -495,7 +483,7 @@ function actualizarTarea(idTareas, nuevoNombre, idMeta) {
         },
         error: function (xhr, status, error) {
             console.error('Error al actualizar la tarea:', error);
-            console.log(xhr.responseText); // Muestra el cuerpo de la respuesta de error
+            console.log(xhr.responseText);
         }
     });
 }
