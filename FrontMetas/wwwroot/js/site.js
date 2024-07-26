@@ -184,33 +184,45 @@ function obtenerMetas() {
         success: function (response) {
             $('#metasTable tbody').empty();
 
-            // Iterar sobre las metas y agregarlas a la tabla
             response.forEach(function (meta) {
-                var progressValue = calcularProgreso(meta);
-                var nuevaFila = `
-                    <tr>
-                        <td>${meta.nombreMeta}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info" data-id="${meta.idMeta}" onclick="obtenerMetaDetalle(${meta.idMeta},1)" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" data-id="${meta.idMeta}" onclick="obtenerMetaDetalle(${meta.idMeta},2)" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                            <button class="btn btn-sm btn-primary" data-id="${meta.idMeta}" onclick="obtenerTareas(${meta.idMeta})" data-bs-toggle="tooltip" data-bs-placement="top" title="Detallar">
-                                <i class="bi bi-list"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <div class="progress mt-2" style="height: 1.5rem;">
-                                <div class="progress-bar" role="progressbar" style="width: ${progressValue}%;" aria-valuenow="${progressValue}" aria-valuemin="0" aria-valuemax="100">${progressValue}%</div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                $('#metasTable tbody').append(nuevaFila);
+                calcularProgreso(meta.idMeta).then(function (progreso) {
+                    progreso = typeof progreso === 'number' ? progreso : 0; // Verificar que progreso sea un número
+                    console.log('Progreso de meta ' + meta.idMeta + ': ' + progreso); // Log del progreso
+
+                    var color;
+                    if (progreso < 40) {
+                        color = 'orange';
+                    } else if (progreso >= 40 && progreso <= 70) {
+                        color = 'blue';
+                    } else {
+                        color = 'green';
+                    }
+
+                    var nuevaFila = `
+                        <tr>
+                            <td>${meta.nombreMeta}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" data-id="${meta.idMeta}" onclick="obtenerMetaDetalle(${meta.idMeta},1)" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" data-id="${meta.idMeta}" onclick="obtenerMetaDetalle(${meta.idMeta},2)" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" data-id="${meta.idMeta}" onclick="obtenerTareas(${meta.idMeta})" data-bs-toggle="tooltip" data-bs-placement="top" title="Detallar">
+                                    <i class="bi bi-list"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="progress mt-2" style="height: 1.5rem;">
+                                    <div class="progress-bar" role="progressbar" style="width: ${progreso}%; background-color: ${color};" aria-valuenow="${progreso}" aria-valuemin="0" aria-valuemax="100">${progreso.toFixed(2)}%</div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    $('#metasTable tbody').append(nuevaFila);
+                });
             });
 
             $('[data-bs-toggle="tooltip"]').tooltip('dispose');
@@ -221,6 +233,40 @@ function obtenerMetas() {
         }
     });
 }
+
+function calcularProgreso(metaId) {
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: urlAPI + 'Metas/Tareas/' + metaId,
+            type: 'GET',
+            success: function (response) {
+                console.log('Tareas para meta ' + metaId + ':', response); // Log para ver las tareas recuperadas
+
+                if (response.length === 0) {
+                    resolve(0);
+                } else {
+                    var totalTareas = response.length;
+                    var tareasCompletadas = response.filter(function (tarea) {
+                        return tarea.idEstatus === 2;
+                    }).length;
+
+                    console.log('Total tareas:', totalTareas, 'Tareas completadas:', tareasCompletadas); // Log para ver conteo de tareas
+
+                    var progreso = (tareasCompletadas / totalTareas) * 100;
+                    resolve(progreso);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error al obtener las tareas para la meta:', error);
+                resolve(0);
+            }
+        });
+    });
+}
+
+
+
+
 
 
 
@@ -295,28 +341,6 @@ function eliminarMeta(idMeta) {
     });    
 }
 
-
-function calcularProgreso(meta) {
-    try {
-        // Obtener las tareas asociadas a la meta
-        var tareas = await obtenerTareas(metaId);
-
-        if (tareas.length === 0) {
-            return 0; // No hay tareas, progreso es 0%
-        }
-
-        var totalTareas = tareas.length;
-        var tareasCompletadas = tareas.filter(t => t.estatusId === 2).length; // Tareas con estatus 2 (completadas)
-
-        var progreso = (tareasCompletadas / totalTareas) * 100;
-
-        return Math.round(progreso); // Retornar el progreso redondeado
-    } catch (error) {
-        console.error('Error al calcular el progreso:', error);
-        return 0; // En caso de error, retornar 0%
-    }
-}
-
 function obtenerTareas(metaId) {
     $.ajax({
         url: urlAPI + 'Metas/Tareas/' + metaId,
@@ -330,7 +354,7 @@ function obtenerTareas(metaId) {
                 // Iterar sobre las tareas y agregarlas a la tabla
                 response.forEach(function (tarea) {
                     console.log(tarea);
-
+                    $('#lblTituloTareas').text('Tareas de Meta: ' + tarea.metaNombre);
                     // Verificar el estatus para desactivar botones si es igual a 2
                     var botonesDesactivados = tarea.estatusId === 2;
 
@@ -454,26 +478,28 @@ function obtenerTareaDetalle(idTarea, tipo) {
     });
 }
 
-function actualizarTarea(idTarea, nuevoNombre,idMeta) {
+function actualizarTarea(idTareas, nuevoNombre, idMeta) {
     $.ajax({
-        url: urlAPI + 'Tareas/' + idTareas, 
+        url: urlAPI + 'Tareas/' + idTareas,
         type: 'PUT',
-        contentType: 'application/json', 
+        contentType: 'application/json',
         data: JSON.stringify({
-            idTareas: idTarea,
-            NombreMeta: nuevoNombre,
-            idMeta: idMeta,
-            FechaActualizacion: new Date().toISOString()
+            NombreTarea: nuevoNombre, // Cambiar a NombreTarea
+            IdMeta: idMeta, // Asegúrate de que este campo sea correcto
+            FechaActualizacion: new Date().toISOString() // FechaActualizacion se puede mantener
         }),
-        success: function (response) {            
+        success: function (response) {
             $('#mdlTarea').modal('hide');
+            obtenerMetas();
             obtenerTareas(idMeta);
         },
         error: function (xhr, status, error) {
-            console.error('Error al actualizar la meta:', error);
+            console.error('Error al actualizar la tarea:', error);
+            console.log(xhr.responseText); // Muestra el cuerpo de la respuesta de error
         }
     });
 }
+
 
 function eliminarTarea(idTarea, idMeta) {
 
@@ -484,6 +510,7 @@ function eliminarTarea(idTarea, idMeta) {
             console.log(response.messaje);
             // Actualiza la tabla de metas después de eliminar la tarea
             $('#mdlTarea').modal('hide');
+            obtenerMetas();
             obtenerTareas(idMeta);
         },
         error: function (xhr, status, error) {
@@ -499,6 +526,7 @@ function actualizaEstatus(idTarea, idMeta) {
         success: function (response) {
             console.log('Estatus actualizado:', response);
             obtenerTareas(idMeta);
+            obtenerMetas();
         },
         error: function (xhr, status, error) {
             console.error('Error al actualizar el estatus:', error);
