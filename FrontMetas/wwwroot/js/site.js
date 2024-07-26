@@ -39,7 +39,7 @@ $(document).ready(function () {
                     console.log('Nueva meta guardada:', response);
                     $('#mdlMeta').modal('hide');
                     obtenerMetas();
-                    // Actualiza la tabla de metas o realiza otras acciones necesarias
+                    cargarMetasEnDropdown();
                 },
                 error: function (xhr, status, error) {
                     alert('Error al guardar la meta: ' + xhr.responseText);
@@ -52,16 +52,14 @@ $(document).ready(function () {
 
     $('#btnEditaMeta').on('click', function () {
         var idMeta = $(this).data('id'); 
-        var nuevoNombre = $('#txtMetaNombre').val();
-        $('#txtMetaNombre').prop('disabled', true);
-
+        var nuevoNombre = $('#txtMetaNombre').val();       
         actualizarMeta(idMeta, nuevoNombre);
     });
 
     $('#btnEliminaMeta').on('click', function () {
         var idMeta = $(this).data('id');
         var nuevoNombre = $('#txtMetaNombre').val();
-
+        $('#txtMetaNombre').prop('disabled', true);
         eliminarMeta(idMeta);        
     });
 
@@ -69,6 +67,9 @@ $(document).ready(function () {
     $('#btnNvaTarea').on('click', function () {
         $('#txtTareaNombre').val('');
         $('#selectMeta').val('0');
+        $('#btnRegistraTarea').show();
+        $('#btnEditaTarea').hide();
+        $('#btnEliminaTarea').hide();
         $('#mdlTarea').modal('show');
     });
 
@@ -97,7 +98,6 @@ $(document).ready(function () {
                     console.log('Nueva tarea guardada:', response);
                     $('#mdlTarea').modal('hide');
                     obtenerTareas(idMeta);
-                    // Actualiza la tabla de tareas o realiza otras acciones necesarias
                 },
                 error: function (xhr, status, error) {
                     alert('Error al guardar la tarea: ' + xhr.responseText);
@@ -108,6 +108,23 @@ $(document).ready(function () {
         }
     });
 
+    $('#btnEditaTarea').on('click', function () {
+        var idTarea = $(this).data('id');
+        var nuevoNombre = $('#txtTareaNombre').val();
+        var idMeta = $('#selectMeta').val();
+        actualizarTarea(idTarea, nuevoNombre, idMeta);
+    });
+
+    $('#btnEliminaTarea').on('click', function () {
+        var idTarea = $(this).data('id');
+        var nuevoNombre = $('#txtTareaNombre').val();
+        var idMeta = $('#selectMeta').val();
+        $('#txtTareaNombre').prop('disabled', true);
+        $('#selectMeta').prop('disabled', true);
+        eliminarTarea(idTarea, idMeta);
+    });
+
+    cargarMetasEnDropdown();
     obtenerMetas();
 });
 
@@ -126,10 +143,10 @@ function obtenerMetas() {
                     <tr>
                         <td>${meta.nombreMeta}</td>
                         <td>
-                            <button class="btn btn-sm btn-info" data-id="${meta.idMeta}" onclick="ObtenerMetaDetalle(${meta.idMeta},1)" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
+                            <button class="btn btn-sm btn-info" data-id="${meta.idMeta}" onclick="obtenerMetaDetalle(${meta.idMeta},1)" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" data-id="${meta.idMeta}" onclick="ObtenerMetaDetalle(${meta.idMeta},2)" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
+                            <button class="btn btn-sm btn-danger" data-id="${meta.idMeta}" onclick="obtenerMetaDetalle(${meta.idMeta},2)" data-bs-toggle="tooltip" data-bs-placement="top" title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
                             <button class="btn btn-sm btn-primary" data-id="${meta.idMeta}" onclick="obtenerTareas(${meta.idMeta})" data-bs-toggle="tooltip" data-bs-placement="top" title="Detallar">
@@ -148,11 +165,11 @@ function obtenerMetas() {
                 $('#metasTable tbody').append(nuevaFila);
             });
 
-            // Inicializar los tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
+            // Destruir los tooltips existentes
+            $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+
+            // Inicializar los nuevos tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
         },
         error: function (xhr, status, error) {
             console.error('Error al obtener las metas:', error);
@@ -160,8 +177,10 @@ function obtenerMetas() {
     });
 }
 
+
+
 // Función para obtener una meta por ID y mostrar los datos en el modal
-function ObtenerMetaDetalle(idMeta,tipo) {
+function obtenerMetaDetalle(idMeta,tipo) {
     $.ajax({
         url: urlAPI + 'Metas/' + idMeta, // URL correcta para el endpoint
         type: 'GET',
@@ -211,6 +230,7 @@ function actualizarMeta(idMeta, nuevoNombre) {
             // Cierra el modal
             $('#mdlMeta').modal('hide');
             obtenerMetas();
+            cargarMetasEnDropdown();
         },
         error: function (xhr, status, error) {
             console.error('Error al actualizar la meta:', error);
@@ -228,6 +248,7 @@ function eliminarMeta(idMeta) {
             // Actualiza la tabla de metas después de eliminar la meta
             $('#mdlMeta').modal('hide');
             obtenerMetas();
+            cargarMetasEnDropdown();
         },
         error: function (xhr, status, error) {
             console.error('Error al eliminar la meta:', error);
@@ -244,7 +265,7 @@ function calcularProgreso(meta) {
 
 function obtenerTareas(metaId) {
     $.ajax({
-        url: urlAPI + 'Metas/Tareas/' + metaId, // URL correcta para el endpoint
+        url: urlAPI + 'Metas/Tareas/' + metaId,
         type: 'GET',
         success: function (response) {
             // Limpiar la tabla de tareas antes de agregar las nuevas filas
@@ -269,6 +290,7 @@ function obtenerTareas(metaId) {
                                         ${botonesDesactivados ? 'disabled' : ''} 
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
+                                        data-id="${tarea.idTarea}" onclick="obtenerTareaDetalle(${tarea.idTarea},1)"
                                         title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </button>
@@ -276,6 +298,7 @@ function obtenerTareas(metaId) {
                                         ${botonesDesactivados ? 'disabled' : ''} 
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
+                                        data-id="${tarea.idTarea}" onclick="obtenerTareaDetalle(${tarea.idTarea},2)"
                                         title="Eliminar">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -283,6 +306,7 @@ function obtenerTareas(metaId) {
                                         ${botonesDesactivados ? 'disabled' : ''} 
                                         data-bs-toggle="tooltip" 
                                         data-bs-placement="top" 
+                                        data-id="${tarea.idTarea}" onclick="actualizaEstatus(${tarea.idTarea},${tarea.idMeta})"
                                         title="Finalizar">
                                     <i class="bi bi-check-circle"></i>
                                 </button>
@@ -318,19 +342,14 @@ function obtenerTareas(metaId) {
     });
 }
 
-
-
-
 function cargarMetasEnDropdown() {
     $.ajax({
-        url: urlAPI + 'Metas', // URL del endpoint para obtener las metas
+        url: urlAPI + 'Metas', 
         type: 'GET',
         success: function (response) {
             var selectMeta = $('#selectMeta');
-            selectMeta.empty(); // Limpiar el dropdown antes de agregar nuevas opciones
-            selectMeta.append('<option value="">Seleccione una meta</option>'); // Opción por defecto
-
-            // Iterar sobre las metas y agregar cada una como opción en el dropdown
+            selectMeta.empty(); 
+            selectMeta.append('<option value="0">Seleccione una meta</option>'); 
             response.forEach(function (meta) {
                 selectMeta.append(
                     `<option value="${meta.idMeta}">${meta.nombreMeta}</option>`
@@ -343,11 +362,102 @@ function cargarMetasEnDropdown() {
     });
 }
 
-// Llamar a la función para cargar las metas cuando se abre el modal
-$('#mdlTarea').on('shown.bs.modal', function () {
-    cargarMetasEnDropdown();
-});
 
+// Función para obtener una tarea por ID y mostrar los datos en el modal
+function obtenerTareaDetalle(idTarea, tipo) {
+    $.ajax({
+        url: urlAPI + 'Tareas/' + idTarea,
+        type: 'GET',
+        success: function (response) {
+            var tarea = response[0];
+            console.log(tarea.idMeta);
+
+            $('#txtTareaNombre').val(tarea.nombreTarea);
+            $('#selectMeta').val(tarea.idMeta);
+            // Seleccionar el valor correcto en el select después de cargar las opciones
+            
+
+            if (tipo == 1) { // Editar
+                $('#txtTareaNombre').prop('disabled', false);
+                $('#selectMeta').prop('disabled', false);
+                $('#mdlTarea .modal-title').text('Editar Tarea');
+                $('#btnRegistraTarea').hide();
+                $('#btnEditaTarea').show().attr('data-id', idTarea);
+                $('#btnEliminaTarea').hide();
+            } else if (tipo == 2) { // Eliminar
+                $('#txtTareaNombre').prop('disabled', true);
+                $('#selectMeta').prop('disabled', true);
+                $('#mdlTarea .modal-title').text('Eliminar Tarea');
+                $('#btnRegistraTarea').hide();
+                $('#btnEditaTarea').hide();
+                $('#btnEliminaTarea').show().attr('data-id', idTarea);
+            }
+
+            
+
+            // Mostrar el modal
+            $('#mdlTarea').modal('show');
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al obtener la tarea:', error);
+        }
+    });
+}
+
+
+function actualizarTarea(idTarea, nuevoNombre,idMeta) {
+    $.ajax({
+        url: urlAPI + 'Tareas/' + idTareas, 
+        type: 'PUT',
+        contentType: 'application/json', 
+        data: JSON.stringify({
+            idTareas: idTarea,
+            NombreMeta: nuevoNombre,
+            idMeta: idMeta,
+            FechaActualizacion: new Date().toISOString()
+        }),
+        success: function (response) {
+            console.log(response.message); // Mensaje de éxito
+            // Cierra el modal
+            $('#mdlTarea').modal('hide');
+            obtenerTareas(idMeta);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al actualizar la meta:', error);
+        }
+    });
+}
+
+function eliminarTarea(idTarea, idMeta) {
+
+    $.ajax({
+        url: urlAPI + 'Tareas/' + idTarea,
+        type: 'DELETE',
+        success: function (response) {
+            console.log(response.messaje);
+            // Actualiza la tabla de metas después de eliminar la tarea
+            $('#mdlTarea').modal('hide');
+            obtenerTareas(idMeta);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al eliminar la tarea:', error);
+        }
+    });
+}
+
+function actualizaEstatus(idTarea, idMeta) {
+    $.ajax({
+        url: urlAPI + 'Tareas/ActualizarEstatus/' + idTarea,
+        type: 'PUT',
+        success: function (response) {
+            console.log('Estatus actualizado:', response);
+            obtenerTareas(idMeta);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error al actualizar el estatus:', error);
+        }
+    });
+}
 
 
 
